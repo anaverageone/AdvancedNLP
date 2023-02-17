@@ -1,6 +1,6 @@
 # Advanced NLP, P4, 2023
 Master of Text Mining, VU University
-Task: emantic Role labeling
+Task: Semantic Role labeling
 
 ### Group members:
 Meruyert Nurberdikhanova (2779728),
