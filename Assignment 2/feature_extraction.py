@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+# pd.options.mode.chained_assignment = None  # default='warn'
 
 def recursive_find_path(df_copy, i):
     current_tag_list = []
@@ -26,9 +26,14 @@ def extract_features(file_path):
     - token's voice (based on dependency relation tags) & its position to predicate,
     - predicate lemma and its pos tag
     - pos tag of each token
-    :param inputfile: string, file path
+    - head word's lemma and its pos tag 
+    - token's position to predicate
+    - governing category and its position to predicate
+    - predicate and head word of the token 
 
-    :return a list of dictionaries
+    :param str inputfile: file path
+
+    :return list features_dict_list:a list of dictionaries with features
     '''
     #read in data to a pandas dataframe
 
@@ -56,8 +61,8 @@ def extract_features(file_path):
         pred_id = None
         try:
             pred_id = pred_item.values[0]
-        except:
-            print(' !!! WARNING !!! There is no predicate in sentence with copy_id:', num)
+        except Exception as err:
+            # print(' !!! WARNING !!! There is no predicate in sentence with copy_id:', num)
             continue
 
         # print("pred_id:",pred_id)
@@ -120,9 +125,9 @@ def extract_features(file_path):
             ### #extract HEAD WD OF TOKEN + POS TAG ###
             head = None
             try:
-                lemma = df_row ['LEMMA']
+                lemma = df_row['LEMMA']
                 head = int(df_row['HEAD'])
-                xpos = df_row ['XPOS']
+                xpos = df_row['XPOS']
                 token = df_row['FORM']
             except Exception as err:
                 print("==== BLAH BLAH ====")
