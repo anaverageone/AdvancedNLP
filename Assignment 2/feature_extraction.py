@@ -23,11 +23,17 @@ def recursive_find_path(df_copy, i):
 
 def extract_features(file_path):
     '''Function for extracting features,
-    - token's voice (based on dependency relation tags) & its position to predicate,
-    - predicate lemma and its pos tag
-    - pos tag of each token
+    - each token, 
+    - each token's pos tag
+    - each token's voice (based on dependency relation tags) + position to predicate,
+    - predicate's lemma + its pos tag (same for all tokens within a sentence)
+    - each token's head word - its lemma + pos tag
+    - each token's position to predicate
+    - governing category, 'nsubj, dobj' - marking each token with these tags + position to predicate
+    - each token's predicate + head of token
+    - path from the token to the root, a list of strings (DEP tag)
     :param inputfile: string, file path
-
+    
     :return a list of dictionaries
     '''
     #read in data to a pandas dataframe
@@ -53,12 +59,12 @@ def extract_features(file_path):
         # pred_row = df_copy.loc[df_copy['UP:PRED']!= '_']
         # pred_id = pred_row['ID']
         pred_item = df_copy['ID'][df_copy['UP:PRED'].str.len() > 2]
-        pred_id = None
-        try:
-            pred_id = pred_item.values[0]
-        except:
-            print(' !!! WARNING !!! There is no predicate in sentence with copy_id:', num)
-            continue
+        pred_id = 0
+        # try:
+        #     pred_id = pred_item.values[0]
+        # except:
+        #     print(' !!! WARNING !!! There is no predicate in sentence with copy_id:', num)
+        #     continue
 
         # print("pred_id:",pred_id)
         # print("type pred_id:", type(pred_id))
@@ -94,15 +100,18 @@ def extract_features(file_path):
 
             ### extract VOICE + POSITION TO PREDICATE ###
             if df_row['DEPREL'] == 'nsubj:pass':
-                
-                if i < (pred_id - 1):
+                if pred_id == 0:
+                    df_row['VOICE'] = 0
+                elif i < (pred_id - 1):
                     df_row['VOICE'] = '1_before'
                 elif i > (pred_id-1):
                     df_row['VOICE'] = '1_after'
                 else:
                     df_row['VOICE'] = '1_same'
             else:
-                if i < (pred_id-1):
+                if pred_id == 0:
+                    df_row['VOICE'] = 0
+                elif i < (pred_id-1):
                     df_row['VOICE'] = '0_before'
                 elif i > (pred_id-1):
                     df_row['VOICE'] = '0_after'
@@ -111,52 +120,45 @@ def extract_features(file_path):
 
             features_dict['voice_position-to-pred'] = df_row['VOICE']
 
-
+            
             ### extract PREDICATE LEMMA + POS TAG ###
+            if pred_id == 0:
+                features_dict['pred-lemma_pos'] = 0
             if i == (pred_id - 1):
                 features_dict['pred-lemma_pos'] = f"{df_row['LEMMA']}_{df_row['XPOS']}"
 
-
+            
             ### #extract HEAD WD OF TOKEN + POS TAG ###
-            head = None
-            try:
-                lemma = df_row ['LEMMA']
-                head = int(df_row['HEAD'])
-                xpos = df_row ['XPOS']
-                token = df_row['FORM']
-            except Exception as err:
-                print("==== BLAH BLAH ====")
-                print(err)
-                raise err
-
-            try:
-                if head == 0:
-                    head_lemma = 'ROOT'
-                    head_pos = 'ROOT'
-                else:
-                    head_lemma = df_copy.iloc[head - 1]['LEMMA']
-                    head_pos = df_copy.iloc[head - 1]['XPOS']
-            except Exception as err:
-                print("==== HEAD HEAD BLAH BLAH ====", 'head', head, type(head))
-                print(err)
-                raise err
+            
+            head = int(df_row['HEAD'])
+            
+    
+            if head == 0:
+                head_lemma = 'ROOT'
+                head_pos = 'ROOT'
+            else:
+                head_lemma = df_copy.iloc[head - 1]['LEMMA']
+                head_pos = df_copy.iloc[head - 1]['XPOS']
 
             features_dict['head_lemma_pos'] = f"{head_lemma}_{head_pos}"
 
-
+            
             ### extract TOKEN POSITION TO PREDICATE ###
-            if i < (pred_id - 1):
+            if pred_id == 0:
+                features_dict['token_position'] = 0
+            elif i < (pred_id - 1):
                 features_dict['token_position'] = 'before'
             elif i > (pred_id-1):
                 features_dict['token_position'] = 'after'
             else:
                 features_dict['token_position'] = 'same'
 
-        
+            
             ### extract LOCATION OF GOVERNING CATEGORY 'nsubj, dobj', and its position to predicate ###
             if df_row['DEPREL'] == 'nsubj':
-                
-                if i < (pred_id - 1):
+                if pred_id == 0:
+                    token_position = 0
+                elif i < (pred_id - 1):
                     token_position = 'nsubj_before'
                 elif i > (pred_id-1):
                     token_position = 'nsubj_after'
@@ -164,6 +166,8 @@ def extract_features(file_path):
                     continue
             
             elif df_row['DEPREL'] == 'dobj':
+                if pred_id == 0:
+                    token_position = 0
                 if i < (pred_id - 1):
                     token_position = 'dobj_before'
                 elif i > (pred_id-1):
@@ -175,7 +179,7 @@ def extract_features(file_path):
 
             features_dict['gov_cat_position'] = token_position
 
-
+            
             ### extract PREDICATE & HEAD OF TOKEN ###
             
             row_head = df_row['HEAD']
@@ -189,7 +193,7 @@ def extract_features(file_path):
                     head_form = 0   
             features_dict['pred_head']= f"{pred_form}_{head_form}"
 
-
+            
             ### extract PATH OF TOKEN TO ROOT, IN DEP TAG ###
             
             sent_path = recursive_find_path(df_copy, i)
