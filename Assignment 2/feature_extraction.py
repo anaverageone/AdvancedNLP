@@ -30,6 +30,7 @@ def extract_features(file_path):
     - token's position to predicate
     - governing category and its position to predicate
     - predicate and head word of the token 
+    - path from the token to the root
 
     :param str inputfile: file path
 
