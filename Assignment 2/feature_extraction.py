@@ -2,8 +2,27 @@ import pandas as pd
 import numpy as np
 
 
+def recursive_find_path(df_copy, i):
+    current_tag_list = []
+ 
+    df_row = df_copy.iloc[i]
+ 
+    deps = df_row['DEPS']
+    deps_tag = deps.split(':',1)[-1]
+    current_tag_list.append(deps_tag)
+
+    if df_row['HEAD'] == 0:
+        return current_tag_list
+    
+    next_id = df_row['HEAD'] - 1
+    recursive_tag_list = recursive_find_path(df_copy, next_id)
+    
+    return current_tag_list + recursive_tag_list
+
+
+
 def extract_features(file_path):
-    '''Function for extracting the following features,
+    '''Function for extracting features,
     - token's voice (based on dependency relation tags) & its position to predicate,
     - predicate lemma and its pos tag
     - pos tag of each token
@@ -23,26 +42,26 @@ def extract_features(file_path):
     features_dict_list = []
 
     copy_id_list = train_df['Copy_ID'].unique()
-    
+
     for num in copy_id_list:
         df_copy = train_df.loc[train_df['Copy_ID'] == num] # subset df for each sentence
 
         # get the length of sentence
         max_wds_count = df_copy['ID'].max()
 
-        #find ID value of the predicate
+        # find ID value of the predicate
         # pred_row = df_copy.loc[df_copy['UP:PRED']!= '_']
         # pred_id = pred_row['ID']
         pred_item = df_copy['ID'][df_copy['UP:PRED'].str.len() > 2]
         pred_id = None
         try:
             pred_id = pred_item.values[0]
-        except Exception as err:
+        except:
             print(' !!! WARNING !!! There is no predicate in sentence with copy_id:', num)
             continue
 
-        print("pred_id:",pred_id)
-        print("type pred_id:", type(pred_id))
+        # print("pred_id:",pred_id)
+        # print("type pred_id:", type(pred_id))
 
         # create a new column "VOICE" and set all values to "0"
         df_copy['VOICE'] = '0' 
@@ -54,6 +73,7 @@ def extract_features(file_path):
         else:
             pred_form = 0
 
+        # recursively find path
         # extract features within each sentence boundary
         for i in range(max_wds_count):
             features_dict = {}
@@ -61,13 +81,18 @@ def extract_features(file_path):
             # row 'i'
             df_row = df_copy.iloc[i]
 
-            # extract each token
+            # COMMENT OUT ANY FEATURES THAT ARE NOT NEEDED BELOW
+            # -------------------------------------------------------------
+            # -------------------------------------------------------------
+
+            # ### extract each token ###
             features_dict['token']=df_row['FORM']
             
-            # extract POS, ALL TOKENS
+
+            ### extract POS, ALL TOKENS ###
             features_dict['pos'] = df_row['XPOS']
 
-            # extract VOICE + POSITION TO PREDICATE
+            ### extract VOICE + POSITION TO PREDICATE ###
             if df_row['DEPREL'] == 'nsubj:pass':
                 
                 if i < (pred_id - 1):
@@ -86,11 +111,12 @@ def extract_features(file_path):
 
             features_dict['voice_position-to-pred'] = df_row['VOICE']
 
-            # extract PREDICATE LEMMA + POS TAG
+
+            ### extract PREDICATE LEMMA + POS TAG ###
             if i == (pred_id - 1):
                 features_dict['pred-lemma_pos'] = f"{df_row['LEMMA']}_{df_row['XPOS']}"
 
-            
+
             ### #extract HEAD WD OF TOKEN + POS TAG ###
             head = None
             try:
@@ -164,12 +190,19 @@ def extract_features(file_path):
             features_dict['pred_head']= f"{pred_form}_{head_form}"
 
 
+            ### extract PATH OF TOKEN TO ROOT, IN DEP TAG ###
+            
+            sent_path = recursive_find_path(df_copy, i)
+            features_dict['path'] = sent_path
+            
+            ###########################################
 
             # -------------------------------------------------------------
             # -------------------------------------------------------------
 
             # all features_dict are appended to features_dict_list:
-            features_dict_list.append(features_dict) 
+            features_dict_list.append(features_dict)
+
         
     return features_dict_list
 
