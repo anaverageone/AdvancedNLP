@@ -82,7 +82,86 @@ def extract_features(file_path):
             # extract PREDICATE LEMMA + POS TAG
             if i == (pred_id - 1):
                 features_dict['pred-lemma_pos'] = f"{df_row['LEMMA']}_{df_row['XPOS']}"
+
             
+            ### #extract HEAD WD OF TOKEN + POS TAG ###
+            head = None
+            try:
+                lemma = df_row ['LEMMA']
+                head = int(df_row['HEAD'])
+                xpos = df_row ['XPOS']
+                token = df_row['FORM']
+            except Exception as err:
+                print("==== BLAH BLAH ====")
+                print(err)
+                raise err
+
+            try:
+                if head == 0:
+                    head_lemma = 'ROOT'
+                    head_pos = 'ROOT'
+                else:
+                    head_lemma = df_copy.iloc[head - 1]['LEMMA']
+                    head_pos = df_copy.iloc[head - 1]['XPOS']
+            except Exception as err:
+                print("==== HEAD HEAD BLAH BLAH ====", 'head', head, type(head))
+                print(err)
+                raise err
+
+            features_dict['head_lemma_pos'] = f"{head_lemma}_{head_pos}"
+
+
+            ### extract TOKEN POSITION TO PREDICATE ###
+            if i < (pred_id - 1):
+                features_dict['token_position'] = 'before'
+            elif i > (pred_id-1):
+                features_dict['token_position'] = 'after'
+            else:
+                features_dict['token_position'] = 'same'
+
+        
+            ### extract LOCATION OF GOVERNING CATEGORY 'nsubj, dobj', and its position to predicate ###
+            if df_row['DEPREL'] == 'nsubj':
+                
+                if i < (pred_id - 1):
+                    token_position = 'nsubj_before'
+                elif i > (pred_id-1):
+                    token_position = 'nsubj_after'
+                else:
+                    continue
+            
+            elif df_row['DEPREL'] == 'dobj':
+                if i < (pred_id - 1):
+                    token_position = 'dobj_before'
+                elif i > (pred_id-1):
+                    token_position = 'dobj_after'
+                else:
+                    continue
+            else:
+                token_position = '0'
+
+            features_dict['gov_cat_position'] = token_position
+
+
+            ### extract PREDICATE & HEAD OF TOKEN ###
+            
+            row_head = df_row['HEAD']
+            if row_head == 0:
+                head_form = 0
+            else:
+                head_rows = df_copy.loc[df_copy['ID'] == row_head,'FORM']
+                if not head_rows.empty:
+                    head_form = head_rows.values[0] 
+                else:
+                    head_form = 0   
+            features_dict['pred_head']= f"{pred_form}_{head_form}"
+
+
+
+            # -------------------------------------------------------------
+            # -------------------------------------------------------------
+
+            # all features_dict are appended to features_dict_list:
             features_dict_list.append(features_dict) 
         
     return features_dict_list
