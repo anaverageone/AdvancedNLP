@@ -1,27 +1,12 @@
 import pandas as pd
+import numpy as np
 import sys
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import classification_report, confusion_matrix
+from feature_extraction import extract_features
 # this code is based on the codes used for Machine Learning for NLP course and for Applied Text Mining 1: Methods
 
-def extract_features(filepath): # needs to be finished
-    '''
-    This function extracts the following features: 
-    - token's voice (based on dependency relation tags) & its position to predicate,
-    - predicate lemma and its pos tag
-    - pos tag of each token
-    
-    :param str filepath: path to the file
-
-    :return list features_list: list of dictionaries with features for each token
-    '''
-    features_list = []
-    
-    df = pd.read_csv(filepath, sep='\t', header=0, encoding='utf-8', quotechar='№')
-
-
-    return features_list
 
 def extract_AI_gold(filepath):
     '''
@@ -66,7 +51,7 @@ def create_classifier(train_features, train_targets):
     :return model: fitted Logistic Regression model
     :return vec: fitted dictionary vectoriser
     '''
-    vec = DictVectorizer(sparse=False)
+    vec = DictVectorizer()
     model = LogisticRegression()
     features_vectorised = vec.fit_transform(train_features)
     model.fit(features_vectorised, train_targets)
@@ -133,33 +118,49 @@ def main(argv=None):
     # feature extraction 
     if feature_extraction:
         # extract features from the training set
+        print('Extracting training features...')
         train_features = extract_features(trainpath)
+        print('Done extracting training features!')
         # extract features from the test set
+        print('Extracting test features...')
         test_features = extract_features(testpath)
+        print('Done extracting test features!')
 
     # ARGUMENT IDENTIFICATION
     if train_AI:
         # extract gold labels
+        print('Extracting AI gold labels...')
         train_AI_labels = extract_AI_gold(trainpath)
         test_AI_labels = extract_AI_gold(testpath)
+        print('Done extracting AI gold labels!')
         # train 1st LogReg
+        print('Training an AI classifier...')
         model_AI, vec_AI = create_classifier(train_features, train_AI_labels)
+        print('Done training an AI classifier!')
         # test 1st LogReg and save the output
         path_AI_predictions = '../data/AI_predictions.tsv'
+        print('Testing an AI classifier...')
         classify_data(model_AI,vec_AI,test_features,testpath,path_AI_predictions)
+        print('Done testing an AI classifier!')
         # evaluate AI (need to have a column with all args having a uniform label bc binary)
         evaluation_report(path_AI_predictions,test_AI_labels, 'Argument Identification')
 
     # ARGUMENT CLASSIFICATION
     if train_AC:
         # extract gold labels
+        print('Extracting AC gold labels...')
         train_AC_labels = extract_AC_gold(trainpath)
         test_AC_labels = extract_AC_gold(testpath)
+        print('Done extracting AC gold labels!')
         # train 2nd LogReg
+        print('Training an AC classifier...')
         model_AC, vec_AC = create_classifier(train_features, train_AC_labels) 
+        print('Done training an AC classifier!')
         # test 2nd LogReg and save the output
         path_AC_predictions = '../data/AC_predictions.tsv'
+        print('Testing an AC classifier...')
         classify_data(model_AC,vec_AC,test_features, testpath, path_AC_predictions)
+        print('Done testing an AC classifier!')
         # evaluate AC
         evaluation_report(path_AC_predictions,test_AC_labels, 'Argument Classification')
 

@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+# pd.options.mode.chained_assignment = None  # default='warn'
 
 def recursive_find_path(df_copy, i):
     current_tag_list = []
