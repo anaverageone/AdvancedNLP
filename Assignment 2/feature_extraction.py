@@ -47,6 +47,13 @@ def extract_features(file_path):
         # create a new column "VOICE" and set all values to "0"
         df_copy['VOICE'] = '0' 
 
+        # predicate for feature "PREDICATE & HEAD OF TOKEN"
+        if not pred_item.empty:
+            pred_id = pred_item.values[0]
+            pred_form = df_copy.loc[df_copy['ID'] == pred_id,'FORM'].values[0]
+        else:
+            pred_form = 0
+
         # extract features within each sentence boundary
         for i in range(max_wds_count):
             features_dict = {}
