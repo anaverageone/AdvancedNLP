@@ -39,6 +39,8 @@ def extract_features(file_path):
     #read in data to a pandas dataframe
 
     train_df = pd.read_csv(file_path, sep='\t', header=0, encoding='utf-8', quotechar='№')
+    total_length = train_df.shape[0]
+    #print('====== BEGIN ======', 'total_length', total_length)
 
     # change values in columns 'sent_id, Copy_ID, id' to integer
     train_df = train_df.astype({'Sent_ID':'int'})
@@ -46,6 +48,7 @@ def extract_features(file_path):
     train_df = train_df.astype({'ID':'int'})
 
     features_dict_list = []
+    #count = 0
 
     copy_id_list = train_df['Copy_ID'].unique()
 
@@ -54,6 +57,9 @@ def extract_features(file_path):
 
         # get the length of sentence
         max_wds_count = df_copy['ID'].max()
+        #count += max_wds_count
+
+        #print('=== df_copy.shape[0]', df_copy.shape[0], 'max_wds_count', max_wds_count, ' === ', count, '/', total_length)
 
         # find ID value of the predicate
         # pred_row = df_copy.loc[df_copy['UP:PRED']!= '_']
@@ -91,7 +97,7 @@ def extract_features(file_path):
             # -------------------------------------------------------------
             # -------------------------------------------------------------
 
-            # ### extract each token ###
+            ### extract each token ###
             features_dict['token']=df_row['FORM']
             
 
@@ -120,19 +126,17 @@ def extract_features(file_path):
 
             features_dict['voice_position-to-pred'] = df_row['VOICE']
 
-            
-            ### extract PREDICATE LEMMA + POS TAG ###
-            if pred_id == 0:
-                features_dict['pred-lemma_pos'] = 0
-            elif i == (pred_id - 1):
-                features_dict['pred-lemma_pos'] = f"{df_copy.iloc[pred_id-1]['LEMMA']}_{df_copy.iloc[pred_id-1]['XPOS']}"
 
-            
+            ### extract PREDICATE LEMMA + POS TAG ###
+            if i == (pred_id - 1):
+                features_dict['pred-lemma_pos'] = f"{df_copy.iloc[pred_id-1]['LEMMA']}_{df_copy.iloc[pred_id-1]['XPOS']}"
+            else:
+                features_dict['pred-lemma_pos'] = '0'
+
+
             ### #extract HEAD WD OF TOKEN + POS TAG ###
-            
             head = int(df_row['HEAD'])
-            
-    
+        
             if head == 0:
                 head_lemma = 'ROOT'
                 head_pos = 'ROOT'
@@ -163,7 +167,8 @@ def extract_features(file_path):
                 elif i > (pred_id-1):
                     token_position = 'nsubj_after'
                 else:
-                    continue
+                    token_position = 'nsubj_same'
+                    #print('===== shit nsubj ======')
             
             elif df_row['DEPREL'] == 'dobj':
                 if pred_id == 0:
@@ -173,7 +178,8 @@ def extract_features(file_path):
                 elif i > (pred_id-1):
                     token_position = 'dobj_after'
                 else:
-                    continue
+                    token_position = 'dobj_same'
+                    #print('===== shit dobj ======')
             else:
                 token_position = '0'
 
@@ -207,6 +213,9 @@ def extract_features(file_path):
             # all features_dict are appended to features_dict_list:
             features_dict_list.append(features_dict)
 
-        
+
+    # print('=== FINISH ===', count, ' / ', total_length)
+    # print('features_dict_list', features_dict_list)
+
     return features_dict_list
 
