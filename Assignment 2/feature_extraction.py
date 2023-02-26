@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-# pd.options.mode.chained_assignment = None  # default='warn'
+pd.options.mode.chained_assignment = None  # default='warn'
 
 def recursive_find_path(df_copy, i):
     current_tag_list = []
@@ -33,12 +33,14 @@ def extract_features(file_path):
     - each token's predicate + head of token
     - path from the token to the root, a list of strings (DEP tag)
     :param inputfile: string, file path
-    
+
     :return a list of dictionaries
     '''
     #read in data to a pandas dataframe
 
-    train_df = pd.read_csv(file_path, sep='\t', header=0, encoding='utf-8', quotechar='№')
+    train_df = pd.read_csv(file_path, sep='\t', header=0, encoding='utf-8', quotechar='№', engine='python')
+
+
     total_length = train_df.shape[0]
     #print('====== BEGIN ======', 'total_length', total_length)
 
@@ -204,7 +206,9 @@ def extract_features(file_path):
             
             sent_path = recursive_find_path(df_copy, i)
             features_dict['path'] = sent_path
-            
+
+
+
             ###########################################
 
             # -------------------------------------------------------------
@@ -216,6 +220,6 @@ def extract_features(file_path):
 
     # print('=== FINISH ===', count, ' / ', total_length)
     # print('features_dict_list', features_dict_list)
-
+        
     return features_dict_list
 
