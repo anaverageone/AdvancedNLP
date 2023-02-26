@@ -124,8 +124,8 @@ def extract_features(file_path):
             ### extract PREDICATE LEMMA + POS TAG ###
             if pred_id == 0:
                 features_dict['pred-lemma_pos'] = 0
-            if i == (pred_id - 1):
-                features_dict['pred-lemma_pos'] = f"{df_row['LEMMA']}_{df_row['XPOS']}"
+            elif i == (pred_id - 1):
+                features_dict['pred-lemma_pos'] = f"{df_copy.iloc[pred_id-1]['LEMMA']}_{df_copy.iloc[pred_id-1]['XPOS']}"
 
             
             ### #extract HEAD WD OF TOKEN + POS TAG ###
@@ -168,7 +168,7 @@ def extract_features(file_path):
             elif df_row['DEPREL'] == 'dobj':
                 if pred_id == 0:
                     token_position = 0
-                if i < (pred_id - 1):
+                elif i < (pred_id - 1):
                     token_position = 'dobj_before'
                 elif i > (pred_id-1):
                     token_position = 'dobj_after'
