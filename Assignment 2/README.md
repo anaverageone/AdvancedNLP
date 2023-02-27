@@ -12,8 +12,8 @@ Siti Nurhalimah (2692449)
 Current repository holds following files for feature extractions:
 - ```split_files.ipynb```: a Jupyter notebook to pre-process original training (en_ewt-up-train.conllu) & test dataset (en_ewt-up-test.conllu) to train_split.tsv and test_split.tsv respectively for feature extraction.  
 
-- ```extract_gold_labels.ipynb```: 
-- ```feature_extraction.py```: a python script to extract features on token-level. Output is used in ```create_classifier.ipynb``` for traiming the classifier.
+- ```extract_gold_labels.ipynb```: a Jupyter notebook to extract gold labels of the dataset for training the classifier. Output is used in ```create_classifier.ipynb``` for training the classifier.
+- ```feature_extraction.py```: a python script to extract features on token-level. Output is used in ```create_classifier.ipynb``` for training the classifier.
 - ```create_classifier.ipynb```: a Jupyter notebook to create classifier with logistic regression algorithm.  
-- ```main.py```:
+- ```main.py```: 
 
