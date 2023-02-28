@@ -5,15 +5,6 @@ Done extracting test features!
 Extracting AI gold labels...
 Done extracting AI gold labels!
 Training an AI classifier...
-C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn\linear_model\_logistic.py:444: ConvergenceWarning: 
-lbfgs failed to converge (status=1):
-STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
-
-Increase the number of iterations (max_iter) or scale the data as shown in:
-    https://scikit-learn.org/stable/modules/preprocessing.html
-Please also refer to the documentation for alternative solver options:
-    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
-  n_iter_i = _check_optimize_result(
 Done training an AI classifier!
 Testing an AI classifier...
 Done testing an AI classifier!
@@ -28,21 +19,21 @@ Done testing an AI classifier!
 weighted avg       0.96      0.96      0.96    103245
 
 ------------- Confusion matrix for Argument Identification step ------------------
-[[10669  3568]
+[[10672  3565]
  [  827 88181]]
 Classification report for Overleaf:
-C:\Users\nurbe\Documents\GitHub\AdvancedNLP-Group3\Assignment 2\main.py:123: FutureWarning: In future versions `DataFrame.to_latex` 
+C:\Users\nurbe\Documents\GitHub\AdvancedNLP-Group3\Assignment 2\main.py:124: FutureWarning: In future versions `DataFrame.to_latex` 
 is expected to utilise the base implementation of `Styler.to_latex` for formatting and rendering. The arguments signature may therefore change. It is recommended instead to use `DataFrame.style.to_latex` which also contains additional functionality.
   print(report_df.to_latex(float_format="%.3f"))
 \begin{tabular}{lrrrr}
 \toprule
 {} &  precision &  recall &  f1-score &    support \\
 \midrule
-ARG          &      0.928 &   0.749 &     0.829 &  14237.000 \\
+ARG          &      0.928 &   0.750 &     0.829 &  14237.000 \\
 O            &      0.961 &   0.991 &     0.976 &  89008.000 \\
 accuracy     &      0.957 &   0.957 &     0.957 &      0.957 \\
-macro avg    &      0.945 &   0.870 &     0.902 & 103245.000 \\
-weighted avg &      0.957 &   0.957 &     0.955 & 103245.000 \\
+macro avg    &      0.945 &   0.870 &     0.903 & 103245.000 \\
+weighted avg &      0.957 &   0.957 &     0.956 & 103245.000 \\
 \bottomrule
 \end{tabular}
 
@@ -53,15 +44,6 @@ Done extracting test features!
 Extracting AC gold labels...
 Done extracting AC gold labels!
 Training an AC classifier...
-C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn\linear_model\_logistic.py:444: ConvergenceWarning: 
-lbfgs failed to converge (status=1):
-STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
-
-Increase the number of iterations (max_iter) or scale the data as shown in:
-    https://scikit-learn.org/stable/modules/preprocessing.html
-Please also refer to the documentation for alternative solver options:
-    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
-  n_iter_i = _check_optimize_result(
 Done training an AC classifier!
 Testing an AC classifier...
 Done testing an AC classifier!
@@ -84,7 +66,7 @@ C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn
               precision    recall  f1-score   support
 
         ARG0       0.80      0.91      0.85      1146
-        ARG1       0.72      0.90      0.80      2037
+        ARG1       0.72      0.90      0.80      2039
         ARG2       0.59      0.72      0.65       643
         ARG3       0.60      0.45      0.51        56
         ARG4       0.67      0.76      0.71        42
@@ -97,7 +79,7 @@ C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn
     ARGM-DIS       0.80      0.85      0.82       131
     ARGM-EXT       0.82      0.66      0.73        62
     ARGM-GOL       0.50      0.07      0.12        14
-    ARGM-LOC       0.64      0.60      0.62       129
+    ARGM-LOC       0.63      0.60      0.62       129
     ARGM-LVB       0.00      0.00      0.00         0
     ARGM-MNR       0.46      0.30      0.36        74
     ARGM-MOD       0.87      1.00      0.93       315
@@ -106,7 +88,7 @@ C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn
     ARGM-PRP       0.54      0.41      0.47        49
     ARGM-PRR       0.67      0.40      0.50        60
     ARGM-TMP       0.81      0.84      0.82       358
-      C-ARG0       0.00      0.00      0.00         1
+      C-ARG0       0.00      0.00      0.00         2
       C-ARG1       0.70      0.58      0.64        24
   C-ARGM-CXN       0.00      0.00      0.00         2
          C-V       0.25      0.50      0.33         2
@@ -119,14 +101,14 @@ C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn
   R-ARGM-TMP       0.00      0.00      0.00         1
            V       1.00      1.00      1.00      4798
 
-    accuracy                           0.84     11496
-   macro avg       0.53      0.52      0.50     11496
-weighted avg       0.79      0.84      0.81     11496
+    accuracy                           0.84     11499
+   macro avg       0.53      0.52      0.50     11499
+weighted avg       0.79      0.84      0.81     11499
 
 ------------- Confusion matrix for Argument Classification step ------------------
 [[1043   87    6 ...    0    0    0]
- [  88 1829   60 ...    0    0    0]
- [   6  134  461 ...    0    0    0]
+ [  88 1830   60 ...    0    0    0]
+ [   6  133  462 ...    0    0    0]
  ...
  [   0    0    0 ...    0    0    0]
  [   0    0    0 ...    0    0    0]
@@ -147,16 +129,16 @@ to control this behavior.
 C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn\metrics\_classification.py:1334: UndefinedMetricWarning: Recall and F-score are ill-defined and being set to 0.0 in labels with no true samples. Use `zero_division` parameter to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
 Classification report for Overleaf:
-C:\Users\nurbe\Documents\GitHub\AdvancedNLP-Group3\Assignment 2\main.py:123: FutureWarning: In future versions `DataFrame.to_latex` 
+C:\Users\nurbe\Documents\GitHub\AdvancedNLP-Group3\Assignment 2\main.py:124: FutureWarning: In future versions `DataFrame.to_latex` 
 is expected to utilise the base implementation of `Styler.to_latex` for formatting and rendering. The arguments signature may therefore change. It is recommended instead to use `DataFrame.style.to_latex` which also contains additional functionality.
   print(report_df.to_latex(float_format="%.3f"))
 \begin{tabular}{lrrrr}
 \toprule
 {} &  precision &  recall &  f1-score &   support \\
 \midrule
-ARG0         &      0.798 &   0.910 &     0.850 &  1146.000 \\
-ARG1         &      0.723 &   0.898 &     0.801 &  2037.000 \\
-ARG2         &      0.590 &   0.717 &     0.647 &   643.000 \\
+ARG0         &      0.797 &   0.910 &     0.850 &  1146.000 \\
+ARG1         &      0.724 &   0.897 &     0.801 &  2039.000 \\
+ARG2         &      0.591 &   0.719 &     0.648 &   643.000 \\
 ARG3         &      0.595 &   0.446 &     0.510 &    56.000 \\
 ARG4         &      0.667 &   0.762 &     0.711 &    42.000 \\
 ARGM-ADJ     &      0.770 &   0.877 &     0.820 &   130.000 \\
@@ -168,7 +150,7 @@ ARGM-DIR     &      0.406 &   0.433 &     0.419 &    30.000 \\
 ARGM-DIS     &      0.799 &   0.847 &     0.822 &   131.000 \\
 ARGM-EXT     &      0.820 &   0.661 &     0.732 &    62.000 \\
 ARGM-GOL     &      0.500 &   0.071 &     0.125 &    14.000 \\
-ARGM-LOC     &      0.639 &   0.605 &     0.622 &   129.000 \\
+ARGM-LOC     &      0.634 &   0.605 &     0.619 &   129.000 \\
 ARGM-LVB     &      0.000 &   0.000 &     0.000 &     0.000 \\
 ARGM-MNR     &      0.458 &   0.297 &     0.361 &    74.000 \\
 ARGM-MOD     &      0.873 &   1.000 &     0.932 &   315.000 \\
@@ -177,7 +159,7 @@ ARGM-PRD     &      0.667 &   0.267 &     0.381 &    15.000 \\
 ARGM-PRP     &      0.541 &   0.408 &     0.465 &    49.000 \\
 ARGM-PRR     &      0.667 &   0.400 &     0.500 &    60.000 \\
 ARGM-TMP     &      0.811 &   0.838 &     0.824 &   358.000 \\
-C-ARG0       &      0.000 &   0.000 &     0.000 &     1.000 \\
+C-ARG0       &      0.000 &   0.000 &     0.000 &     2.000 \\
 C-ARG1       &      0.700 &   0.583 &     0.636 &    24.000 \\
 C-ARGM-CXN   &      0.000 &   0.000 &     0.000 &     2.000 \\
 C-V          &      0.250 &   0.500 &     0.333 &     2.000 \\
@@ -190,8 +172,8 @@ R-ARGM-MNR   &      0.000 &   0.000 &     0.000 &     1.000 \\
 R-ARGM-TMP   &      0.000 &   0.000 &     0.000 &     1.000 \\
 V            &      1.000 &   1.000 &     1.000 &  4798.000 \\
 accuracy     &      0.841 &   0.841 &     0.841 &     0.841 \\
-macro avg    &      0.526 &   0.516 &     0.504 & 11496.000 \\
-weighted avg &      0.788 &   0.841 &     0.811 & 11496.000 \\
+macro avg    &      0.526 &   0.516 &     0.504 & 11499.000 \\
+weighted avg &      0.788 &   0.841 &     0.811 & 11499.000 \\
 \bottomrule
 \end{tabular}
 
@@ -224,7 +206,7 @@ to control this behavior.
     ARGM-DIS       0.80      0.61      0.69       182
     ARGM-EXT       0.82      0.39      0.53       105
     ARGM-GOL       0.50      0.04      0.08        24
-    ARGM-LOC       0.64      0.38      0.47       207
+    ARGM-LOC       0.63      0.38      0.47       207
     ARGM-LVB       0.00      0.00      0.00        69
     ARGM-MNR       0.46      0.15      0.22       148
     ARGM-MOD       0.87      0.71      0.78       442
@@ -254,17 +236,9 @@ to control this behavior.
            V       1.00      1.00      1.00      4802
 
     accuracy                           0.95    103245
-   macro avg       0.43      0.27      0.32    103245
+   macro avg       0.43      0.28      0.32    103245
 weighted avg       0.94      0.95      0.94    103245
 
-------------- Confusion matrix for SRL ------------------
-[[1043   87    0 ...    0    0    0]
- [  88 1829    0 ...    0    0    0]
- [   0    0    0 ...    0    0    0]
- ...
- [   0    0    0 ...    0    0    0]
- [   0    0    0 ...    0    0    0]
- [   0    0    0 ...    0    0 4798]]
 C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn\metrics\_classification.py:1334: UndefinedMetricWarning: Precision and F-score are ill-defined and being set to 0.0 in labels with no predicted samples. Use `zero_division` parameter 
 to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
@@ -275,17 +249,17 @@ C:\Users\nurbe\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn
 to control this behavior.
   _warn_prf(average, modifier, msg_start, len(result))
 Classification report for Overleaf:
-C:\Users\nurbe\Documents\GitHub\AdvancedNLP-Group3\Assignment 2\main.py:235: FutureWarning: In future versions `DataFrame.to_latex` 
+C:\Users\nurbe\Documents\GitHub\AdvancedNLP-Group3\Assignment 2\main.py:254: FutureWarning: In future versions `DataFrame.to_latex` 
 is expected to utilise the base implementation of `Styler.to_latex` for formatting and rendering. The arguments signature may therefore change. It is recommended instead to use `DataFrame.style.to_latex` which also contains additional functionality.
   print(report_df.to_latex(float_format="%.3f"))
 \begin{tabular}{lrrrr}
 \toprule
 {} &  precision &  recall &  f1-score &    support \\
 \midrule
-ARG0         &      0.798 &   0.602 &     0.686 &   1733.000 \\
-ARG1         &      0.723 &   0.564 &     0.634 &   3241.000 \\
+ARG0         &      0.797 &   0.602 &     0.686 &   1733.000 \\
+ARG1         &      0.724 &   0.565 &     0.634 &   3241.000 \\
 ARG1-DSP     &      0.000 &   0.000 &     0.000 &      4.000 \\
-ARG2         &      0.590 &   0.408 &     0.483 &   1129.000 \\
+ARG2         &      0.591 &   0.409 &     0.484 &   1129.000 \\
 ARG3         &      0.595 &   0.338 &     0.431 &     74.000 \\
 ARG4         &      0.667 &   0.571 &     0.615 &     56.000 \\
 ARG5         &      0.000 &   0.000 &     0.000 &      1.000 \\
@@ -299,7 +273,7 @@ ARGM-DIR     &      0.406 &   0.277 &     0.329 &     47.000 \\
 ARGM-DIS     &      0.799 &   0.610 &     0.692 &    182.000 \\
 ARGM-EXT     &      0.820 &   0.390 &     0.529 &    105.000 \\
 ARGM-GOL     &      0.500 &   0.042 &     0.077 &     24.000 \\
-ARGM-LOC     &      0.639 &   0.377 &     0.474 &    207.000 \\
+ARGM-LOC     &      0.634 &   0.377 &     0.473 &    207.000 \\
 ARGM-LVB     &      0.000 &   0.000 &     0.000 &     69.000 \\
 ARGM-MNR     &      0.458 &   0.149 &     0.224 &    148.000 \\
 ARGM-MOD     &      0.873 &   0.713 &     0.785 &    442.000 \\

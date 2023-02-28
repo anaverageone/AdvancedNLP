@@ -2,6 +2,14 @@ import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 
 def recursive_find_path(df_copy, i):
+    '''
+    This function is used to find a full path from the current token to the root of the sentence.
+
+    :param DataFrame df_copy: subset of the current sentence in the data
+    :param int i: token's position within the sentence
+
+    :return list: a list containing all the dependency tags of tokens in the path from the current token to the root
+    '''
     current_tag_list = []
  
     df_row = df_copy.iloc[i]
@@ -20,10 +28,9 @@ def recursive_find_path(df_copy, i):
 
 
 
-def get_features(file_path, dataset_type): # writing 7 features into tsv
-    '''Function for extracting features,
-    - each token, 
-    - each token's pos tag
+def get_features(file_path, dataset_type):
+    '''
+    This function creates a new file with the columns for following features:
     - each token's voice (based on dependency relation tags) + position to predicate,
     - predicate's lemma + its pos tag (same for all tokens within a sentence)
     - each token's head word - its lemma + pos tag
@@ -31,6 +38,7 @@ def get_features(file_path, dataset_type): # writing 7 features into tsv
     - governing category, 'nsubj, dobj' - marking each token with these tags + position to predicate
     - each token's predicate + head of token
     - path from the token to the root, a list of strings (DEP tag)
+
     :param str file_path: path to the file
     :param str dataset_type: either 'train' or 'test'
 
@@ -192,7 +200,22 @@ def get_features(file_path, dataset_type): # writing 7 features into tsv
 
 def extract_features(filepath, task_name, data_type):
     '''
-    
+    Function for extracting features:
+    - each token, 
+    - each token's pos tag
+    - each token's voice (based on dependency relation tags) + position to predicate,
+    - predicate's lemma + its pos tag (same for all tokens within a sentence)
+    - each token's head word - its lemma + pos tag
+    - each token's position to predicate
+    - governing category, 'nsubj, dobj' - marking each token with these tags + position to predicate
+    - each token's predicate + head of token
+    - path from the token to the root, a list of strings (DEP tag)
+
+    :param str filepath: path to the file with all the features
+    :param str task_name: 'AC' or 'AI' 
+    :param str data_type: 'train' or 'test'
+
+    :return list features_list: list of dictionaries of features
     '''
     features_df = pd.read_csv(filepath, sep='\t', header=0, encoding='utf-8', quotechar='№', engine='python')
     features_list = []

@@ -4,6 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import classification_report, confusion_matrix
 from feature_extraction import get_features, extract_features
+from split_files import remove_comments, split_by_predicates
 pd.options.mode.chained_assignment = None  # default='warn'
 # this code is based on the codes used for Machine Learning for NLP course and for Applied Text Mining 1: Methods
 
@@ -34,6 +35,8 @@ def extract_AC_gold(filepath, data_type):
     The labels are 'O', 'V', and labels of arguments from PropBank.
 
     :param str filepath: path to the file
+    :param str data_type: 'train' or 'test'
+
     :return list target_list: list containing the gold labels
     '''
     file_df = pd.read_csv(filepath, sep='\t', header=0, encoding='utf-8', quotechar='№', engine='python')
@@ -56,7 +59,7 @@ def create_classifier(train_features, train_targets):
     :return vec: fitted dictionary vectoriser
     '''
     vec = DictVectorizer()
-    model = LogisticRegression(max_iter=700)
+    model = LogisticRegression(max_iter=1000) # lower did not converge
     features_vectorised = vec.fit_transform(train_features)
     model.fit(features_vectorised, train_targets)
 
@@ -98,7 +101,7 @@ def evaluation_report(filepath, gold_labels, task_name):
 
     :param str filepath: path to the file with predictions
     :param list gold_labels: list of gold labels 
-    :param str task_name: name to specify while printing
+    :param str task_name: name to specify while printing, 'Argument Identification' and 'Argument Classification'
 
     :return: None
     '''
@@ -127,22 +130,38 @@ def main(argv=None):
     '''
     This function executes all the code needed for Semantic Role Labelling task.
 
-    :param list argv: list of arguments in the form ['main.py', bool_1, bool_2]
+    :param list argv: list of arguments in the form ['main.py', bool_1, bool_2, bool_3, bool_4, bool_5]
 
-    bool_1: whether to write additional features into tsv files
-    bool_2: whether to train & evaluate a classifier for Argument Identification
-    bool_3: whether to train & evaluate a classifier for Argument Classification
-    bool_4: 
+    bool_1: whether to split original data by predicates
+    bool_2: whether to write additional features into tsv files
+    bool_3: whether to train & evaluate a classifier for Argument Identification
+    bool_4: whether to train & evaluate a classifier for Argument Classification 
+    bool_5: whether to print results of combined Argument Identification and Classification steps
     '''
     # arguments 
     if argv == None:
         argv = sys.argv
     
-    write_features = argv[1]
-    train_AI = argv[2]
-    train_AC = argv[3]
-    overall_report = argv[4]
+    preprocessing = argv[1]
+    write_features = argv[2]
+    train_AI = argv[3]
+    train_AC = argv[4]
+    overall_report = argv[5]
 
+    # split original dataset sentences by predicates
+    if preprocessing:
+        # paths to original datasets
+        trainpath = 'en_ewt-up-train.conllu'
+        testpath = 'en_ewt-up-test.conllu'
+        # paths to datasets without comments
+        train_no_comment = 'train_without_comments.tsv'
+        test_no_comment = 'test_without_comments.tsv'
+        # remove commented out lines from the original data
+        remove_comments(trainpath,train_no_comment)
+        remove_comments(testpath,test_no_comment)
+        # split sentences in the datasets by predicates
+        split_by_predicates(train_no_comment,'train')
+        split_by_predicates(test_no_comment,'test')
     # write additional features into a separate tsv files
     if write_features:
         # paths to datasets split by predicates
@@ -223,12 +242,14 @@ def main(argv=None):
         df = pd.read_csv(pred_path, sep='\t', header=0, encoding='utf-8', quotechar='№', engine='python')
         gold_labels = df['UP:ARGHEADS'].tolist()
         predictions = df['Predictions_AC'].tolist()
+        labels = df['UP:ARGHEADS'].unique().tolist()
         report = classification_report(gold_labels, predictions)
-        matrix = confusion_matrix(gold_labels, predictions)
+        matrix = confusion_matrix(gold_labels, predictions, labels=labels)
+        matrix_df = pd.DataFrame(matrix, index= labels, columns=labels)
+        # save the confusion matrix away bc its too large to display
+        matrix_df.to_csv('overall_confusion_matrix.tsv',sep='\t')
         print('------------- Classification report for SRL ------------------')
         print(report)
-        print('------------- Confusion matrix for SRL ------------------')
-        print(matrix)
         report_dict = classification_report(gold_labels, predictions, output_dict=True)
         report_df = pd.DataFrame(report_dict).transpose()
         print('Classification report for Overleaf:')
@@ -236,5 +257,5 @@ def main(argv=None):
 
 
 if __name__ == '__main__':
-    my_args = ['main.py', False, True, True, True]
+    my_args = ['main.py', False, False, True, True, True]
     main(my_args)
