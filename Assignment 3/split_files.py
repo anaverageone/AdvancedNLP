@@ -1,4 +1,5 @@
 import pandas as pd
+# this is just an exact copy of the script used in Assignment 2
 
 def remove_comments(readpath, writepath):
     '''
