@@ -3,6 +3,7 @@ from split_files import remove_comments,split_by_predicates
 import sys
 # this script uses code previously made for Assignment 2 of the Advanced NLP course
 import json
+import os
 
 def bio_labels(label):
     '''
@@ -28,7 +29,7 @@ def write_jsonl(filepath, data_type):
     df = pd.read_csv(filepath,sep='\t',encoding='utf-8',engine='python',quotechar='№',header=0)
     # split the data into sentences with separate predicate
     sentences = df.groupby(['Copy_ID'])
-    output_json_file = f'data/{data_type}.jsonl'
+    output_json_file = f'../data/{data_type}.jsonl'
     with open(output_json_file, 'w',encoding='utf-8') as outfile:
         for name, sentence in sentences:
             # create a dictionary for each sentence (aka a line in the jsonl file)
@@ -76,8 +77,6 @@ def main(argv=None):
     
     split_sentences = argv[1]
     create_jsonl = argv[2]
-    print("split_sentces False?:", split_sentences)
-    print()
     
     train_jsonl_file = None ### ---------- added --------- ###
     test_jsonl_file = None ### ---------- added --------- ###
@@ -96,8 +95,9 @@ def main(argv=None):
         split_by_predicates(train_no_comment,'train')
         split_by_predicates(test_no_comment,'test')
     if create_jsonl:
-        trainpath = 'data/train_split_small.tsv'  
-        testpath = 'data/test_split_small.tsv'
+        print(os.getcwd())
+        trainpath = '../data_C/train_split_small.tsv'  
+        testpath = '../data_C/test_split_small.tsv'
         train_jsonl_file = write_jsonl(trainpath, 'train') ### ---------- added variable name --------- ###
         test_jsonl_file = write_jsonl(testpath, 'test') ### ---------- added variable name --------- ###
     

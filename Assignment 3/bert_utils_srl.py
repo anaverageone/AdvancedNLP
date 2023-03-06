@@ -51,39 +51,27 @@ def wordpieces_to_tokens(wordpieces: List, labelpieces: List = None) -> Tuple[Li
     return full_words, full_labels
 
 
-def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, original_labels: List=None) -> Tuple[List, List]:
+def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, original_labels: List=None) -> Tuple[List, List]: #, original_pred_sense: List=None
     """
-    - Sentence tokenized by BERT
-    - assign label to head of token only, if token is split into multiple tokens by BERT (snowboarding > snow,##boarding)
-    - add "X" as label to all additional tokens 
-    - add [CLS] at the beginning of sent
-    - add [SEP] at end of sent
-    - add label 'X' to [CLS] and [SEP]
     Also Expands BIO, but assigns the original label ONLY to the Head of the WordPiece (First WP)
     :param original_sentence: List of Full-Words
     :param original_labels: List of Labels corresponding to each Full-Word
     :param tokenizer: To convert it into BERT-model WordPieces
     :return:
     """
-    txt_sentence = " ".join(original_sentence) # joins tokens to make sentence
-    txt_sentence = txt_sentence.replace("##", "") #???
-    word_pieces = tokenizer.tokenize(txt_sentence) #tokenize with BerTokenizer
+    txt_sentence = " ".join(original_sentence) 
+    txt_sentence = txt_sentence.replace("##", "") 
+    word_pieces = tokenizer.tokenize(txt_sentence) 
     print("word_pieces:", word_pieces)
     print()
 
     if original_labels:
-        tmp_labels, lbl_ix = [], 0
-        print("tmp_labels:",tmp_labels)
-        print()
-        print('original_labels:', original_labels)
-        print()
-        #head_tokens = [1] * len(word_pieces) #initialize an array with len(word_pieces) with 1, if len = 2 > [1,1]
-        # print("head_tokens:", head_tokens)
-        # print()
-        for i, tok in enumerate(word_pieces): #word_pieces: ['where', 'is', 'Tom', 'snow', '##boarding']
+        tmp_labels, lbl_ix= [], 0
+   
+        for i, tok in enumerate(word_pieces): 
             if "##" in tok:
                 tmp_labels.append("X")
-                #head_tokens[i] = 0
+     
             else:
                 tmp_labels.append(original_labels[lbl_ix])
                 lbl_ix += 1
@@ -91,29 +79,48 @@ def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, orig
         word_pieces = ["[CLS]"] + word_pieces + ["[SEP]"]
         labels = ["X"] + tmp_labels + ["X"]
         return word_pieces, labels
+
     else:
         return word_pieces, []
-        
+    
+    # if original_pred_sense:
+    #     tmp_pred = []
 
-def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, labels: List=None, label2index: Dict=None, pad_token_label_id: int=-100) -> Tuple:
+    #     for i, tok in enumerate(word_pieces): 
+    #         if "##" in tok:
+    #             tmp_pred.append("X")
+     
+    #         else:
+    #             tmp_pred.append(original_pred_sense[lbl_ix])
+    #             lbl_ix += 1
+    #     pred_sense = ["X"] + tmp_pred + ["X"]
+
+
+
+
+
+def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, labels: List=None, label2index: Dict=None, pred_sense: List=None, pad_token_label_id: int=-100) -> Tuple:
     tokenized_sentences, label_indices = [], []
     for i, sentence in enumerate(dataset):
-        # Get WordPiece Indices
-        # labels = gold labels of each token
-        # label2index = dict of label:value (not including 'X')
-        # wordpieces = result of BERT tokenizer, including [CLS] [SEP]
-        # labelset = labels after BERTtokenizer (including 'X')
+        
         if labels and label2index:
-            wordpieces, labelset = expand_to_wordpieces(sentence, tokenizer, labels[i]) # with gold label
+            wordpieces, labelset, pred_sense_set = expand_to_wordpieces(sentence, tokenizer, labels[i], pred_sense) 
+            print("wordpiece:", wordpieces)
+            print()
+            print("labelset:", labelset)
+            print()
+            print("pred_sense_set:", pred_sense_set)
+            print()
             label_indices.append([label2index.get(lbl, pad_token_label_id) for lbl in labelset])
         else:
-             wordpieces, labelset = expand_to_wordpieces(sentence, tokenizer, None) #no gold label - for prediction
+             wordpieces, labelset = expand_to_wordpieces(sentence, tokenizer, None) 
         
-        input_ids = tokenizer.convert_tokens_to_ids(wordpieces) # required for BERT to get token ids for each token
+        input_ids = tokenizer.convert_tokens_to_ids(wordpieces) 
         print("input_ids:", input_ids)
         print()
-        tokenized_sentences.append(input_ids) # list [lists of sent with tokens represented as BERT token ids]
+        tokenized_sentences.append(input_ids) 
         print("tokenized_sentences:",tokenized_sentences)
+        print()
 
     seq_lengths = [len(s) for s in tokenized_sentences]
     logger.info(f"MAX TOKENIZED SEQ LENGTH IN DATASET IS {max(seq_lengths)}")
@@ -137,8 +144,8 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
         # Create the attention mask.
         #   - If a token ID is 0, then it's padding, set the mask to 0.
         #   - If a token ID is > 0, then it's a real token, set the mask to 1.
-        att_mask = [int(token_id > 0) for token_id in sent] # int(True) = 1, int(False) = 0
-        # Store the attention mask for this sentence.
+        att_mask = [int(token_id > 0) for token_id in sent] 
+     
         attention_masks.append(att_mask)
     return LongTensor(input_ids), LongTensor(attention_masks), label_ids,  LongTensor(seq_lengths)
 
@@ -146,10 +153,10 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
 def get_annotatated_sentence(rows: List, has_labels: bool) -> Tuple[List, List]:
     x, y = [], []
     for row in rows:
-        if has_labels: #has NER label, including 'O'
-            tok, chunk, chunk_bio, ent_bio = row # give each value a name
-            x.append(tok) # = row[0] - first value of the row
-            y.append(ent_bio) # = row[3] - 4th value of the row, which is the NER tag
+        if has_labels: 
+            tok, chunk, chunk_bio, ent_bio = row 
+            x.append(tok) 
+            y.append(ent_bio)
         else:
             tok, chunk, chunk_bio, _ = row
             x.append(tok)
@@ -158,26 +165,23 @@ def get_annotatated_sentence(rows: List, has_labels: bool) -> Tuple[List, List]:
 
 def add_to_label_dict(labels:List, label_dict: Dict) -> Dict:
     for l in labels:
-        if l not in label_dict: # 'not' add labels that are not in dict already
+        if l not in label_dict: 
             label_dict[l] = len(label_dict)
-    return label_dict # assign an index to each label ex - {'B-LOC': 0, 'I-MISC' = 1, 'O' = 2, ....}
+    return label_dict 
 
 
-# ': str' - ensure input is string
-# '-> Tuple[List, List, Dict]' - showing the output is a tuple of 3 variables - 2 Lists and 1 Dict - (from typing import List, Dict, Tuple)
+
 def read_json_srl(filename: str, delimiter: str='\t') -> Tuple[List, List, Dict]: #, has_labels: bool=True
     
     ### read in the jsonl file
     json_list_dict = []
 
-    with open('data/test.jsonl', 'r') as json_file:
+    with open(filename, 'r') as json_file:
         json_list = list(json_file)
 
     for json_str in json_list:
-        #print(json_str)
+    
         result = json.loads(json_str)
-        # print(f"result: {result}")
-        # print(isinstance(result, dict))
         json_list_dict.append(result)
 
     i = 0
