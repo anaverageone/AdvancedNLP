@@ -51,7 +51,7 @@ def wordpieces_to_tokens(wordpieces: List, labelpieces: List = None) -> Tuple[Li
     return full_words, full_labels
 
 
-def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, original_labels: List=None) -> Tuple[List, List]: #, original_pred_sense: List=None
+def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, original_labels: List=None, original_pred_sense: List=None) -> Tuple[List, List]: #, original_pred_sense: List=None
     """
     Also Expands BIO, but assigns the original label ONLY to the Head of the WordPiece (First WP)
     :param original_sentence: List of Full-Words
@@ -65,6 +65,9 @@ def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, orig
     print("word_pieces:", word_pieces)
     print()
 
+    labels = []
+    pred_sense = []
+
     if original_labels:
         tmp_labels, lbl_ix= [], 0
    
@@ -76,44 +79,54 @@ def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, orig
                 tmp_labels.append(original_labels[lbl_ix])
                 lbl_ix += 1
 
-        word_pieces = ["[CLS]"] + word_pieces + ["[SEP]"]
         labels = ["X"] + tmp_labels + ["X"]
-        return word_pieces, labels
 
-    else:
-        return word_pieces, []
     
-    # if original_pred_sense:
-    #     tmp_pred = []
+    if original_pred_sense:
+        tmp_pred, pred_ix = [], 0
 
-    #     for i, tok in enumerate(word_pieces): 
-    #         if "##" in tok:
-    #             tmp_pred.append("X")
+        for i, tok in enumerate(word_pieces): 
+            if "##" in tok:
+                tmp_pred.append("X")
      
-    #         else:
-    #             tmp_pred.append(original_pred_sense[lbl_ix])
-    #             lbl_ix += 1
-    #     pred_sense = ["X"] + tmp_pred + ["X"]
+            else:
+                tmp_pred.append(str(original_pred_sense[pred_ix]))
+                pred_ix += 1
+        
+        pred_sense = ["X"] + tmp_pred + ["X"]
+        word_pieces = ["[CLS]"] + word_pieces + ["[SEP]"]
+
+    return word_pieces, labels, pred_sense
 
 
 
 
-
-def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, labels: List=None, label2index: Dict=None, pred_sense: List=None, pad_token_label_id: int=-100) -> Tuple:
-    tokenized_sentences, label_indices = [], []
+def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, labels: List=None, label2index: Dict=None, pred_sense: List=None, pred2index: Dict=None, pad_token_label_id: int=-100) -> Tuple:
+    tokenized_sentences, label_indices, pred_indices = [], [], []
     for i, sentence in enumerate(dataset):
         
-        if labels and label2index:
-            wordpieces, labelset, pred_sense_set = expand_to_wordpieces(sentence, tokenizer, labels[i], pred_sense) 
-            print("wordpiece:", wordpieces)
-            print()
-            print("labelset:", labelset)
-            print()
-            print("pred_sense_set:", pred_sense_set)
-            print()
-            label_indices.append([label2index.get(lbl, pad_token_label_id) for lbl in labelset])
-        else:
-             wordpieces, labelset = expand_to_wordpieces(sentence, tokenizer, None) 
+        wordpieces, labelset, pred_sense_set = expand_to_wordpieces(sentence, tokenizer, labels[i], pred_sense[i]) 
+        print("wordpieces type:", type(wordpieces))
+        print("labelset type:", type(labelset))
+        print("pred_sense_set type:", type(pred_sense_set))
+        label_indices.append([label2index.get(lbl, pad_token_label_id) for lbl in labelset])
+        print("original labels:", labels)
+        print("labelset:", labelset)
+        print("label_indices:", label_indices)
+        print()
+        # pred2index = {'0':0, '1':1}
+        pred_indices.append([pred2index.get(pred, pad_token_label_id) for pred in pred_sense_set])
+        print("original pred_sense:", pred_sense)
+        print("pred_sense_set:", pred_sense_set)
+        print("pred_indices:", pred_indices)
+        print()
+
+        # if labels and label2index:
+        #     wordpieces, labelset, pred_sense_set = expand_to_wordpieces(sentence, tokenizer, labels[i], pred_sense) 
+        #     label_indices.append([label2index.get(lbl, pad_token_label_id) for lbl in labelset])
+        # else:
+        #      wordpieces, labelset = expand_to_wordpieces(sentence, tokenizer, None) 
+
         
         input_ids = tokenizer.convert_tokens_to_ids(wordpieces) 
         print("input_ids:", input_ids)
@@ -130,11 +143,17 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
 
     if label_indices:
         label_ids = pad_sequences(label_indices, maxlen=max_len, dtype="long", value=pad_token_label_id, truncating="post", padding="post")
-        label_ids = LongTensor(label_ids) #LongTensor - multi-dimensional matrix containing elements of a single data type, here is 64-bit int
+        label_ids = LongTensor(label_ids) 
     else:
         label_ids = None
     print("label_ids:",label_ids)
     print()
+
+    if pred_indices:
+        pred_ids = pad_sequences(pred_indices, maxlen=max_len, dtype="long", value=pad_token_label_id, truncating="post", padding="post")
+        pred_ids = LongTensor(pred_ids) 
+    else:
+        pred_ids = None
     
     # Create attention masks
     attention_masks = []
@@ -147,7 +166,7 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
         att_mask = [int(token_id > 0) for token_id in sent] 
      
         attention_masks.append(att_mask)
-    return LongTensor(input_ids), LongTensor(attention_masks), label_ids,  LongTensor(seq_lengths)
+    return LongTensor(input_ids), LongTensor(attention_masks), label_ids, LongTensor(seq_lengths), pred_ids
 
 
 def get_annotatated_sentence(rows: List, has_labels: bool) -> Tuple[List, List]:
@@ -190,6 +209,7 @@ def read_json_srl(filename: str, delimiter: str='\t') -> Tuple[List, List, Dict]
     label_list=[]
     all_labels = []
     label_dict = {}
+    pred_sense_dict = {}
 
     all_pred_sense= []
     keys = list(json_list_dict[0].keys())
@@ -210,14 +230,15 @@ def read_json_srl(filename: str, delimiter: str='\t') -> Tuple[List, List, Dict]
             if not j == pred_index or pred_index == 'no':
                 pred_sense = 0
             else:
-                pred_sense = json_list_dict[i][keys[2]][1]
+                pred_sense = 1 #json_list_dict[i][keys[2]][1]
 
             pred_sense_list.append(pred_sense)
 
         all_pred_sense.append(pred_sense_list)
+        pred_sense_dict = {'0':0, '1':1}
         
         logger.info("Read {} Sentences!".format(len(all_sentences)))
-    return all_sentences, all_labels, label_dict, all_pred_sense
+    return all_sentences, all_labels, label_dict, all_pred_sense, pred_sense_dict
 
 
 ##### Evaluation Functions ##### 
@@ -228,16 +249,18 @@ def evaluate_bert_model(eval_dataloader: DataLoader, eval_batch_size: int, model
     logger.info("  Batch size = %d", eval_batch_size)
     eval_loss = 0.0
     nb_eval_steps = 0
-    preds = None
+    preds = None ### ??? predictions ??? ###
     input_ids, gold_label_ids = None, None
     # Put model on Evaluation Mode!
     model.eval()
     for batch in eval_dataloader:
         # Add batch to GPU
         batch = tuple(t.to(device) for t in batch)
+        print("length of batch in evalute_bert_model:",len(batch))
 
         # Unpack the inputs from our dataloader
-        b_input_ids, b_input_mask, b_labels, b_len = batch
+        b_input_ids, b_input_mask, b_labels = batch
+        ###### removed ", b_len " - error: too many values to unpack (expected 3)######
 
         with torch.no_grad():
             outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels)
