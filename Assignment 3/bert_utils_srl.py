@@ -62,8 +62,6 @@ def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, orig
     txt_sentence = " ".join(original_sentence) 
     txt_sentence = txt_sentence.replace("##", "") 
     word_pieces = tokenizer.tokenize(txt_sentence) 
-    print("word_pieces:", word_pieces)
-    print()
 
     labels = []
     pred_sense = []
@@ -106,34 +104,13 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
     for i, sentence in enumerate(dataset):
         
         wordpieces, labelset, pred_sense_set = expand_to_wordpieces(sentence, tokenizer, labels[i], pred_sense[i]) 
-        print("wordpieces type:", type(wordpieces))
-        print("labelset type:", type(labelset))
-        print("pred_sense_set type:", type(pred_sense_set))
         label_indices.append([label2index.get(lbl, pad_token_label_id) for lbl in labelset])
-        print("original labels:", labels)
-        print("labelset:", labelset)
-        print("label_indices:", label_indices)
-        print()
+
         # pred2index = {'0':0, '1':1}
         pred_indices.append([pred2index.get(pred, pad_token_label_id) for pred in pred_sense_set])
-        print("original pred_sense:", pred_sense)
-        print("pred_sense_set:", pred_sense_set)
-        print("pred_indices:", pred_indices)
-        print()
-
-        # if labels and label2index:
-        #     wordpieces, labelset, pred_sense_set = expand_to_wordpieces(sentence, tokenizer, labels[i], pred_sense) 
-        #     label_indices.append([label2index.get(lbl, pad_token_label_id) for lbl in labelset])
-        # else:
-        #      wordpieces, labelset = expand_to_wordpieces(sentence, tokenizer, None) 
-
         
         input_ids = tokenizer.convert_tokens_to_ids(wordpieces) 
-        print("input_ids:", input_ids)
-        print()
         tokenized_sentences.append(input_ids) 
-        print("tokenized_sentences:",tokenized_sentences)
-        print()
 
     seq_lengths = [len(s) for s in tokenized_sentences]
     logger.info(f"MAX TOKENIZED SEQ LENGTH IN DATASET IS {max(seq_lengths)}")
@@ -146,8 +123,6 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
         label_ids = LongTensor(label_ids) 
     else:
         label_ids = None
-    print("label_ids:",label_ids)
-    print()
 
     if pred_indices:
         pred_ids = pad_sequences(pred_indices, maxlen=max_len, dtype="long", value=pad_token_label_id, truncating="post", padding="post")
@@ -256,14 +231,14 @@ def evaluate_bert_model(eval_dataloader: DataLoader, eval_batch_size: int, model
     for batch in eval_dataloader:
         # Add batch to GPU
         batch = tuple(t.to(device) for t in batch)
-        print("length of batch in evalute_bert_model:",len(batch))
 
         # Unpack the inputs from our dataloader
-        b_input_ids, b_input_mask, b_labels = batch
-        ###### removed ", b_len " - error: too many values to unpack (expected 3)######
+        b_input_ids, b_input_mask, b_labels, b_preds = batch
+        ###### removed ", b_len ", added "b-preds" ######
 
         with torch.no_grad():
-            outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels)
+            outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels) #, token_type_ids=b_preds) #input_ids = 
+            ### added token_type_ids for b_preds ###
             tmp_eval_loss, logits = outputs[:2]
             eval_loss += tmp_eval_loss.item()
         nb_eval_steps += 1
