@@ -107,7 +107,7 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
         label_indices.append([label2index.get(lbl, pad_token_label_id) for lbl in labelset])
 
         # pred2index = {'0':0, '1':1}
-        pred_indices.append([pred2index.get(pred, pad_token_label_id) for pred in pred_sense_set])
+        pred_indices.append([pred2index.get(pred, 0) for pred in pred_sense_set])
         
         input_ids = tokenizer.convert_tokens_to_ids(wordpieces) 
         tokenized_sentences.append(input_ids) 
@@ -125,7 +125,7 @@ def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, label
         label_ids = None
 
     if pred_indices:
-        pred_ids = pad_sequences(pred_indices, maxlen=max_len, dtype="long", value=pad_token_label_id, truncating="post", padding="post")
+        pred_ids = pad_sequences(pred_indices, maxlen=max_len, dtype="long", value=0, truncating="post", padding="post")
         pred_ids = LongTensor(pred_ids) 
     else:
         pred_ids = None
@@ -237,7 +237,7 @@ def evaluate_bert_model(eval_dataloader: DataLoader, eval_batch_size: int, model
         ###### removed ", b_len ", added "b-preds" ######
 
         with torch.no_grad():
-            outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels) #, token_type_ids=b_preds) #input_ids = 
+            outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels, token_type_ids=b_preds) #input_ids = 
             ### added token_type_ids for b_preds ###
             tmp_eval_loss, logits = outputs[:2]
             eval_loss += tmp_eval_loss.item()
