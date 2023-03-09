@@ -13,7 +13,7 @@ Siti Nurhalimah (2692449)
 ### Files, input requirements, parameters, output:
 Zip file (also in repository link above) holds following files for BERT fine-tuning for SRL:
 - ```split_files.py```: 
-    - a helper functions for ```make_jsonl.py``` to pre-process original training (en_ewt-up-train.conllu) & test dataset (en_ewt-up-test.conllu), script is an exact copy from assignment 2.
+    - helper functions for ```make_jsonl.py``` to pre-process original training (en_ewt-up-train.conllu) & test dataset (en_ewt-up-test.conllu), script is an exact copy from assignment 2.
     - output - train_split.tsv and test_split.tsv (respectively) for feature extraction.  
 - ```make_jsonl.py```: 
     - a sript preprocesses the original datasets and creates .jsonl files to feed into transformer model for Assignment 3.
