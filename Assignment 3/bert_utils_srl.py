@@ -210,7 +210,7 @@ def read_json_srl(filename: str, delimiter: str='\t') -> Tuple[List, List, Dict]
             pred_sense_list.append(pred_sense)
 
         all_pred_sense.append(pred_sense_list)
-        pred_sense_dict = {'0':0, '1':1}
+        pred_sense_dict = {'0':0, '1':1} 
         
         logger.info("Read {} Sentences!".format(len(all_sentences)))
     return all_sentences, all_labels, label_dict, all_pred_sense, pred_sense_dict

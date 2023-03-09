@@ -14,9 +14,8 @@ import make_jsonl as jsonl
 GPU_IX=0
 device, USE_CUDA = utils.get_torch_device(GPU_IX)
 FILE_HAS_GOLD = True
-SEQ_MAX_LEN = 256
+SEQ_MAX_LEN = 512
 BATCH_SIZE = 4
-# IMPORTANT NOTE: We predict on the dev set to make the results comparable with your previous models from this course
 
 MODEL_DIR = "saved_models/MY_BERT_NER/"
 LOAD_EPOCH = 1
