@@ -1,7 +1,3 @@
-### ------------------------------------------------ ###
-### -------- SCRIPT STILL NEEDS TO BE REVIEWED & UPDATED ------ ###
-### ------------------------------------------------ ###
-
 from typing import List, Dict, Tuple
 from torch.utils.data import DataLoader
 from transformers import BertTokenizer
@@ -50,8 +46,8 @@ def wordpieces_to_tokens(wordpieces: List, labelpieces: List = None) -> Tuple[Li
         assert len(full_words) == len(full_labels)
     return full_words, full_labels
 
-
-def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, original_labels: List=None, original_pred_sense: List=None) -> Tuple[List, List]: #, original_pred_sense: List=None
+def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, original_labels: List=None, 
+                         original_pred_sense: List=None) -> Tuple[List, List]:
     """
     Also Expands BIO, but assigns the original label ONLY to the Head of the WordPiece (First WP)
     :param original_sentence: List of Full-Words
@@ -99,7 +95,8 @@ def expand_to_wordpieces(original_sentence: List, tokenizer: BertTokenizer, orig
 
 
 
-def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, labels: List=None, label2index: Dict=None, pred_sense: List=None, pred2index: Dict=None, pad_token_label_id: int=-100) -> Tuple:
+def data_to_tensors(dataset: List, tokenizer: BertTokenizer, max_len: int, labels: List=None, label2index: Dict=None, 
+                    pred_sense: List=None, pred2index: Dict=None, pad_token_label_id: int=-100) -> Tuple:
     tokenized_sentences, label_indices, pred_indices = [], [], []
     for i, sentence in enumerate(dataset):
         
@@ -165,19 +162,16 @@ def add_to_label_dict(labels:List, label_dict: Dict) -> Dict:
 
 
 
-def read_json_srl(filename: str, delimiter: str='\t') -> Tuple[List, List, Dict]: #, has_labels: bool=True
-    
+def read_json_srl(filename: str, delimiter: str='\t') -> Tuple[List, List, Dict]: 
     ### read in the jsonl file
     json_list_dict = []
 
     with open(filename, 'r') as json_file:
         json_list = list(json_file)
-
     for json_str in json_list:
     
         result = json.loads(json_str)
         json_list_dict.append(result)
-
     i = 0
     token_list=[]
     all_sentences = []
@@ -185,33 +179,25 @@ def read_json_srl(filename: str, delimiter: str='\t') -> Tuple[List, List, Dict]
     all_labels = []
     label_dict = {}
     pred_sense_dict = {}
-
     all_pred_sense= []
     keys = list(json_list_dict[0].keys())
-
     for i in range(len(json_list_dict)):
         token_list = json_list_dict[i][keys[0]]
         all_sentences.append(token_list)
-
         label_list = json_list_dict[i][keys[1]]
         all_labels.append(label_list)
         label_dict = add_to_label_dict(label_list, label_dict)
-
         pred_index = json_list_dict[i][keys[2]][0]
         j = 0
         pred_sense_list = []
         for j in range(len(token_list)):
-            
             if not j == pred_index or pred_index == 'no':
                 pred_sense = 0
             else:
                 pred_sense = 1 #json_list_dict[i][keys[2]][1]
-
             pred_sense_list.append(pred_sense)
-
         all_pred_sense.append(pred_sense_list)
         pred_sense_dict = {'0':0, '1':1} 
-        
         logger.info("Read {} Sentences!".format(len(all_sentences)))
     return all_sentences, all_labels, label_dict, all_pred_sense, pred_sense_dict
 

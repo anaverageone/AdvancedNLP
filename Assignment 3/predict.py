@@ -1,13 +1,9 @@
 
 from transformers import pipeline
-from torch.utils.data import SequentialSampler
-
 from torch.nn import CrossEntropyLoss
-from torch.utils.data import TensorDataset, DataLoader, RandomSampler
-from transformers import BertForTokenClassification, AdamW
-from transformers import get_linear_schedule_with_warmup
-import logging, sys
-from transformers import BertTokenizer
+from torch.utils.data import TensorDataset, DataLoader, SequentialSampler
+from transformers import BertForTokenClassification, BertTokenizer
+import logging
 import bert_utils_srl as utils
 import make_jsonl as jsonl
 
@@ -28,24 +24,24 @@ file_hdlr = logging.FileHandler(filename=f"{MODEL_DIR}/EPOCH_{LOAD_EPOCH}/BERT_T
 logging.basicConfig(level=logging.INFO, handlers=[console_hdlr, file_hdlr])
 
 
-def main(argv=None):
+def main():
     '''
     This function provides the following:
-    - 
-    - 
+    - load the test set
+    - pre-process original datasets into jsonl format
+    - pre-process jsonl format datasets with BertTokenizer
+    - datasets formatted to DataLoader matrices
+    - load the fine-tuned model
+    - predict labels for the test set
+    - log all the progress
+    - provide the precision, recall, and f1-score 
     
     '''
     
-    if argv == None:
-        argv = sys.argv
-    
-    split_sentences = argv[1]
-    create_jsonl = argv[2]
-
     # ------------------------------------------------------------------- #
     print("Read test dataset and convert to jsonl format")
     # ------------------------------------------------------------------- #
-    train_jsonl_file, test_jsonl_file = jsonl.main(['make_jsonl.py', False, True])
+    test_jsonl_file = jsonl.main(['make_jsonl.py', False, True])
 
     ### ------ update testing data jsonl file ------ ###
     TEST_DATA_PATH = test_jsonl_file
@@ -64,7 +60,7 @@ def main(argv=None):
     # ------------------------------------------------------------------- #
     train_pred2index = {'0':0, '1':1}
     
-    test_data, test_labels, _, test_pred_sense, _ = utils.read_json_srl(TEST_DATA_PATH)# , has_labels=FILE_HAS_GOLD)
+    test_data, test_labels, _, test_pred_sense, _ = utils.read_json_srl(TEST_DATA_PATH)
     prediction_inputs, prediction_masks, gold_labels, seq_lens, gold_pred = utils.data_to_tensors(test_data, 
                                                                                    tokenizer, 
                                                                                    max_len=SEQ_MAX_LEN, 
@@ -120,5 +116,4 @@ def main(argv=None):
 
 
 if __name__ == '__main__':
-    my_args = ['make_jsonl.py', False, True]
-    main(my_args)
+    main()

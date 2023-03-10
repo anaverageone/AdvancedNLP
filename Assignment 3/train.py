@@ -3,13 +3,8 @@ import torch
 from torch.nn import CrossEntropyLoss
 import numpy as np
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler
-from transformers import BertForTokenClassification, AdamW
-from transformers import get_linear_schedule_with_warmup
+from transformers import BertForTokenClassification, AdamW, get_linear_schedule_with_warmup, BertTokenizer
 import logging, sys
-from transformers import BertTokenizer
-import pandas as pd
-
-# Our code behind the scenes!
 import bert_utils_srl as utils
 import make_jsonl as jsonl
 
@@ -17,14 +12,13 @@ import make_jsonl as jsonl
 # Initialize Hyperparameters
 # ------------------------------------------------------------------- #
 
-
 EPOCHS = 2
 
 BERT_MODEL_NAME = "bert-base-multilingual-cased"
 GPU_RUN_IX=0
 
 SEED_VAL = 1234500
-SEQ_MAX_LEN = 512 #256
+SEQ_MAX_LEN = 512 
 PRINT_INFO_EVERY = 10 # Print status only every X batches
 GRADIENT_CLIP = 1.0
 LEARNING_RATE = 1e-5
@@ -52,7 +46,6 @@ torch.manual_seed(SEED_VAL)
 torch.cuda.manual_seed_all(SEED_VAL)
 
 
-
 # ------------------------------------------------------------------- #
 # Set up log file location for recording progress
 # ------------------------------------------------------------------- #
@@ -61,9 +54,6 @@ console_hdlr = logging.StreamHandler(sys.stdout)
 file_hdlr = logging.FileHandler(filename=f"{SAVE_MODEL_DIR}/BERT_TokenClassifier_train_{EPOCHS}.log")
 logging.basicConfig(level=logging.INFO, handlers=[console_hdlr, file_hdlr])
 logging.info("Start Logging")
-
-
-
 
 
 
@@ -80,12 +70,6 @@ def main(argv=None):
     - all progress are recorded in log files
     '''
     
-    if argv == None:
-        argv = sys.argv
-    
-    split_sentences = argv[1]
-    create_jsonl = argv[2]
-
     # ------------------------------------------------------------------- #
     print("------ Read dataset and convert to jsonl format ------")
     # ------------------------------------------------------------------- #
@@ -106,7 +90,7 @@ def main(argv=None):
     # ------------------------------------------------------------------- #
     print("------ Train Dataset - load jsonl training set, pre-process with tokenizer for creating DataLoader ------")
     # ------------------------------------------------------------------- #
-    train_data, train_labels, train_label2index, train_pred_sense, train_pred2index = utils.read_json_srl(TRAIN_DATA_PATH) #, has_labels=True)
+    train_data, train_labels, train_label2index, train_pred_sense, train_pred2index = utils.read_json_srl(TRAIN_DATA_PATH)
     train_inputs, train_masks, train_labels, seq_lengths, train_pred = utils.data_to_tensors(train_data, 
                                                                                 tokenizer, 
                                                                                 max_len=SEQ_MAX_LEN, 
@@ -193,8 +177,8 @@ def main(argv=None):
             model.zero_grad()
 
             # Perform a forward pass (evaluate the model on this training batch).
-            outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels, token_type_ids=b_preds) #input_ids = 
-            ### added token_tupe_ids = b_preds, also 'input_ids')
+            outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels, token_type_ids=b_preds) 
+            ### added token_type_ids = b_preds
             loss = outputs[0]
             total_loss += loss.item()
 
@@ -250,5 +234,4 @@ def main(argv=None):
     logging.info("------ Training complete! ------")
 
 if __name__ == '__main__':
-    my_args = ['make_jsonl.py', False, True]
-    main(my_args)
+    main()

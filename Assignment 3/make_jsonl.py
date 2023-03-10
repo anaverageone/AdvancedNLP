@@ -29,7 +29,7 @@ def write_jsonl(filepath, data_type):
     df = pd.read_csv(filepath,sep='\t',encoding='utf-8',engine='python',quotechar='№',header=0)
     # split the data into sentences with separate predicate
     sentences = df.groupby(['Copy_ID'])
-    output_json_file = f'../data/{data_type}.jsonl'
+    output_json_file = f'data/{data_type}.jsonl'
     with open(output_json_file, 'w',encoding='utf-8') as outfile:
         for name, sentence in sentences:
             # create a dictionary for each sentence (aka a line in the jsonl file)
@@ -96,8 +96,8 @@ def main(argv=None):
         split_by_predicates(test_no_comment,'test')
     if create_jsonl:
         print(os.getcwd())
-        trainpath = '../data_C/train_split_small.tsv'  
-        testpath = '../data_C/test_split_small.tsv'
+        trainpath = 'data/train_split.tsv'  
+        testpath = 'data/test_split.tsv'
         train_jsonl_file = write_jsonl(trainpath, 'train') ### ---------- added variable name --------- ###
         test_jsonl_file = write_jsonl(testpath, 'test') ### ---------- added variable name --------- ###
     
