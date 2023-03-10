@@ -25,6 +25,7 @@ Zip file (also in repository link above) holds following files for BERT fine-tun
 - ```predict.py```:
     - a script to make predication on SRL task with the fine-tuned model from 'train.py' - preprocess the .jsonl test set with BertTokenizer, and provide prediction of the test set. Progress, predictions, and the evaluation of the prediction (in the value of precision, recall, and f1-score) are recorded in log files.
     - user to update - user to review the following variables for any updates/changes - FILE_HAS_GOLD, SEQ_MAX_LEN, BATCH_SIZE, MODEL_DIR, LOAD_EPOCH, INPUTS_PATH, OUTPUTS_PATH
-
+- ```bert_finetune_srl.ipynb```:
+    - a notebook before the conversion to scripts ```train.py``` and ```predict.py``` that we have used to check the performance on Google Colab. The last cell's output contains the performance scores used in the pdf of the assignment.
 
 

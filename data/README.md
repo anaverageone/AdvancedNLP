@@ -6,3 +6,4 @@ Specifically, there are:
 - ```train_split.tsv``` and ```test_split.tsv```: modified datasets with sentences split and copied by the amount of predicates present in each (used to created new features)
 - ```train_with_features.tsv``` and ```test_with_features.tsv```: modified datasets with additional features
 - ```AI_predictions.tsv``` and ```AC_predictions.tsv```: test datasets with predictions saved for Argument Identification step and Argument Classification step
+- ```model_inputs.txt``` and ```model_outputs.txt```: token sequences and predicted SRL labels of the fine-tuned BERT; this output was made on Google Colab
